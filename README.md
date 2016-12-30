@@ -1,7 +1,7 @@
 
 ## About
 
-TrueFX downloader is a script written in Python in order to download Forex tick data from [TrueFX](http://www.truefx.com/) service.
+TrueFX script written in Python is written in order to download Forex tick data from [TrueFX](http://www.truefx.com/) service.
 
 ## Usage
 
