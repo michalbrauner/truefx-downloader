@@ -33,10 +33,12 @@ class Manager:
         for fname in self.get_filenames_to_delete(year, symbol, directory):
             os.unlink(fname)
 
-    def get_filenames_to_merge(self, year, symbol, directory):
+    @staticmethod
+    def get_filenames_to_merge(year, symbol, directory):
         return glob.glob(directory + symbol.upper() + '-' + str(year) + '-*.csv')
 
-    def get_filenames_to_delete(self, year, symbol, directory):
+    @staticmethod
+    def get_filenames_to_delete(year, symbol, directory):
         return glob.glob(directory + symbol.lower() + '-' + str(year) + '-*.zip') \
                + glob.glob(directory + symbol.upper() + '-' + str(year) + '-*.csv')
 
@@ -84,30 +86,35 @@ class Manager:
 
         opener.addheaders += [("Referer", self.url_provider.get_download_referrer_url(year, month))]
 
-        try:
-            url_to_download = self.url_provider.get_download_url1(year, month, symbol)
-            print("Downloading '%s' to '%s'" % (url_to_download, filename_with_directory))
-            response = opener.open(url_to_download)
-            f = open(filename_with_directory, "wb")
-            f.write(response.read())
-            f.close()
-        except:
-            print("Downloading '%s' to '%s'" % (url_to_download, filename_with_directory))
-            
-            try:
-                url_to_download = self.url_provider.get_download_url2(year, month, symbol)
-                print("Downloading '%s' to '%s'" % (url_to_download, filename_with_directory))
-                response = opener.open(url_to_download)
-                f = open(filename_with_directory, "wb")
-                f.write(response.read())
-                f.close()
-            except:
-                raise
+        url_to_download = self.url_provider.get_download_url_type_1(year, month, symbol)
+        self.print_download_status(filename_with_directory, url_to_download)
 
+        try:
+            self.save_data_from_url_to_file(filename_with_directory, opener, url_to_download)
+        except urllib2.HTTPError:
+            url_to_download = self.url_provider.get_download_url_type_2(year, month, symbol)
+            self.print_download_status(filename_with_directory, url_to_download)
+
+            try:
+                self.save_data_from_url_to_file(filename_with_directory, opener, url_to_download)
+            except urllib2.HTTPError as http_error:
+                raise http_error
 
         return filename_with_directory
 
-    def get_downloaded_filename(self, month, symbol, year):
+    @staticmethod
+    def print_download_status(filename_with_directory, url_to_download):
+        print("Downloading '%s' to '%s'" % (url_to_download, filename_with_directory))
+
+    @staticmethod
+    def save_data_from_url_to_file(filename_with_directory, opener, url_to_download):
+        response = opener.open(url_to_download)
+        f = open(filename_with_directory, "wb")
+        f.write(response.read())
+        f.close()
+
+    @staticmethod
+    def get_downloaded_filename(month, symbol, year):
         return symbol.lower() + "-" + str(year) + "-" + str(month).zfill(2) + ".zip"
 
     def login_to_true_fx(self, username, password):
@@ -136,13 +143,15 @@ class Manager:
         else:
             return False
 
-    def get_ssl_default_context(self):
+    @staticmethod
+    def get_ssl_default_context():
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
         return ctx
 
-    def check_login_from_response(self, response):
+    @staticmethod
+    def check_login_from_response(response):
         the_page = response.read()
         tree = html.fromstring(the_page)
 

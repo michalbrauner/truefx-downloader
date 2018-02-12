@@ -27,14 +27,14 @@ class UrlProvider:
                 + "&dir=" + str(year) + "/" \
                 + self.months.get(month).upper() + "-" + str(year)
 
-    def get_download_url1(self, year, month, symbol):
+    def get_download_url_type_1(self, year, month, symbol):
         return self.base_url_http \
                + "dev/data/" \
                + str(year) + "/" \
                + str(year) + "-" + str(month).zfill(2) + "/" \
                + symbol.upper() + "-" + str(year) + "-" + str(month).zfill(2) + ".zip"
 
-    def get_download_url2(self, year, month, symbol):
+    def get_download_url_type_2(self, year, month, symbol):
         return self.base_url_http \
                + "dev/data/" \
                + str(year) + "/" \
