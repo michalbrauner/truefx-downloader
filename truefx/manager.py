@@ -84,15 +84,26 @@ class Manager:
 
         opener.addheaders += [("Referer", self.url_provider.get_download_referrer_url(year, month))]
 
-        url_to_download = self.url_provider.get_download_url(year, month, symbol)
+        try:
+            url_to_download = self.url_provider.get_download_url1(year, month, symbol)
+            print("Downloading '%s' to '%s'" % (url_to_download, filename_with_directory))
+            response = opener.open(url_to_download)
+            f = open(filename_with_directory, "wb")
+            f.write(response.read())
+            f.close()
+        except:
+            print("Downloading '%s' to '%s'" % (url_to_download, filename_with_directory))
+            
+            try:
+                url_to_download = self.url_provider.get_download_url2(year, month, symbol)
+                print("Downloading '%s' to '%s'" % (url_to_download, filename_with_directory))
+                response = opener.open(url_to_download)
+                f = open(filename_with_directory, "wb")
+                f.write(response.read())
+                f.close()
+            except:
+                raise
 
-        print("Downloading '%s' to '%s'" % (url_to_download, filename_with_directory))
-
-        response = opener.open(url_to_download)
-
-        f = open(destination_directory + filename, "wb")
-        f.write(response.read())
-        f.close()
 
         return filename_with_directory
 
